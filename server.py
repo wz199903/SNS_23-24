@@ -29,6 +29,8 @@ def get_date(message, mode):
             elif "next year" in message_lower:
                 next_year = current_year + 1
                 return next_year
+            else:
+                return "error"
     elif mode == 1:
         date_return = str(parser.parse(message, fuzzy=True))
         return date_return
@@ -36,6 +38,8 @@ def get_date(message, mode):
 
 
 def get_answer(index, date, result):
+    if date == "error":
+        return f"Sorry, the year you are asking is invalid. How can I assist you further?"
     if index == 0:
         return f"The champion of prime league of year {date} is {result}. How can I assist you further?"
     if index == 1:
