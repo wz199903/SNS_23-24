@@ -82,11 +82,11 @@ def plot_correlation_heatmap(data):
 # 100: Away, 001: Home, 010: Draw
 train_data['FTR_OHE1'] = train_OHE[:, 0]
 train_data['FTR_OHE2'] = train_OHE[:, 1]
-train_data['FTR_OHE2'] = train_OHE[:, 2]
+train_data['FTR_OHE3'] = train_OHE[:, 2]
 
 test_data['FTR_OHE1'] = test_OHE[:, 0]
 test_data['FTR_OHE2'] = test_OHE[:, 1]
-test_data['FTR_OHE2'] = test_OHE[:, 2]
+test_data['FTR_OHE3'] = test_OHE[:, 2]
 
 train_data.to_csv('./Datasets/train_set_en.csv', index=False)
 test_data.to_csv('./Datasets/test_set_en.csv', index=False)
