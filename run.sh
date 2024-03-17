@@ -1,0 +1,1 @@
+python train.py --train_data "Datasets/train_set_en.csv" --train_label "Datasets/train_onehot.csv" --test_data "Datasets/test_set_en.csv" --test_label "Datasets/test_onehot.csv" --epochs 50 --batch_size 64 --learning_rate 0.001 --model_save_path "/Datasets/path_to_save_model.pth" --use_cuda

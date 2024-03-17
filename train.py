@@ -11,28 +11,28 @@ import torch.optim as optim
 # use parser for implementation
 import argparse
 
-
 class CSVDataset(Dataset):
-    def __init__(self, csv_file_data,csv_file_label):
+    def __init__(self, csv_file_data, csv_file_label):
         self.data_frame_data = pd.read_csv(csv_file_data)
         self.data_frame_label = pd.read_csv(csv_file_label)
-    
 
     def __len__(self):
         return len(self.data_frame_data)
-
-    # def __len__(self):
-    #     return len(self.data_frame)
     
     def __getitem__(self, idx):
-        x = self.data_frame_data.iloc[idx].values.astype('float32')
-        y = self.data_frame_label.iloc[idx].values.astype('float32')
-        
+        x = self.data_frame_data.iloc[idx, 41:-3] 
+        y = self.data_frame_label.iloc[idx]  
+
         # Convert to PyTorch tensors
         x = torch.tensor(x, dtype=torch.float32)
-        y = torch.tensor(y, dtype=torch.float32)
         
-        return x, y
+        # Convert one-hot encoded labels to class index
+        y = torch.tensor(y, dtype=torch.float32)
+        label_index = torch.argmax(y)  # Get the index of the max value in the one-hot encoded vector
+        
+        return x, label_index
+
+
 
 def get_args():
     parser = argparse.ArgumentParser(description="parser for SNS coursework model training and testing")
@@ -70,8 +70,8 @@ def train(args, model, device):
     # train_loader = DataLoader(dataset=train_dataset, batch_size=args.batch_size, shuffle=True)
     
     # Define model, loss, and optimizer
-    model = model().to(device)
-    criterion = nn.CrossEntropyLoss()  # Adjust based on your task
+    model.to(device)
+    criterion = nn.CrossEntropyLoss() 
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     
     # Training loop
@@ -98,27 +98,25 @@ def test(args, model, device):
     test_loader = DataLoader(dataset=test_dataset, batch_size=args.batch_size, shuffle=True)
 
 
-     # Define model, loss, and optimizer
-    model = model().to(device)
-    criterion = nn.CrossEntropyLoss()  # Adjust based on your task
+    criterion = nn.CrossEntropyLoss()  
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     
-    # Training loop
-    for epoch in range(args.epochs):
-        model.train()
-        for batch_idx, (data, target) in enumerate(test_loader):
+
+    test_loss = 0
+    correct = 0
+
+    with torch.no_grad():
+        for data, target in test_loader:
             data, target = data.to(device), target.to(device)
-            optimizer.zero_grad()
             output = model(data)
             loss = criterion(output, target)
-            loss.backward()
-            optimizer.step()
-            
-            if batch_idx % 100 == 0:
-                print(f'Train Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)} ({100. * batch_idx / len(train_loader):.0f}%)]\tLoss: {loss.item():.6f}')
-    
-    torch.save(model.state_dict(), args.model_save_path)
-    print('Training Complete.')
+            test_loss += loss.item()
+            _, predicted = torch.max(output.data, 1)
+            correct += (predicted == target).sum().item()
+
+    test_loss /= len(test_loader.dataset)
+    accuracy = 100. * correct / len(test_loader.dataset)
+    print(f'Test set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({accuracy:.0f}%)')
 
 
 
@@ -129,16 +127,11 @@ if __name__ == "__main__":
     args = get_args()
     device = torch.device("cuda" if args.use_cuda and torch.cuda.is_available() else "cpu")
 
-    model = RNNModel()
+    # Initialize the model just once and send it to the device
+    model = RNNModel(26,1,3) 
+    train(args, model, device)
 
-    # Check and use CUDA if available and requested
-    if args.use_cuda and torch.cuda.is_available():
-        model.cuda()
-
-    # Call the training function
-    train(args, model)
-
-    test(args, model)
+    test(args, model, device)
 
 
 
