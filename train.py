@@ -8,7 +8,7 @@ from torchvision import datasets, transforms
 from model import *
 import torch.optim as optim
 
-# use parser for implementation
+# use parser for implementation 
 import argparse
 
 class CSVDataset(Dataset):
@@ -22,13 +22,16 @@ class CSVDataset(Dataset):
     def __getitem__(self, idx):
         x = self.data_frame_data.iloc[idx, 41:-3] 
         y = self.data_frame_label.iloc[idx]  
+        
 
         # Convert to PyTorch tensors
         x = torch.tensor(x, dtype=torch.float32)
-        
+        # print(x.shape)
+
+
         # Convert one-hot encoded labels to class index
         y = torch.tensor(y, dtype=torch.float32)
-        label_index = torch.argmax(y)  # Get the index of the max value in the one-hot encoded vector
+        label_index = torch.argmax(y)  
         
         return x, label_index
 
@@ -38,11 +41,11 @@ def get_args():
     parser = argparse.ArgumentParser(description="parser for SNS coursework model training and testing")
     
     # Model hyperparameters
-    parser.add_argument('--epochs', type=int, default=50, help='Number of epochs to train')
-    parser.add_argument('--batch_size', type=int, default=64, help='Batch size for training')
+    parser.add_argument('--epochs', type=int, default=50, help='Number of epochs')
+    parser.add_argument('--batch_size', type=int, default=64, help='Batch size')
     parser.add_argument('--learning_rate', type=float, default=0.001, help='Learning rate')
     
-    # Data
+    # Train and test data set
     parser.add_argument('--train_data', type=str, required=True, help='Path to the training data')
     parser.add_argument('--test_data', type=str, required=True, help='Path to the test data')
 
@@ -127,8 +130,9 @@ if __name__ == "__main__":
     args = get_args()
     device = torch.device("cuda" if args.use_cuda and torch.cuda.is_available() else "cpu")
 
-    # Initialize the model just once and send it to the device
-    model = RNNModel(26,1,3) 
+    # model = RNNModel(input_dim=1, units=1, output_size=3)
+    model = MatchPredictor(27,2,3)
+
     train(args, model, device)
 
     test(args, model, device)
