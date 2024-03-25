@@ -7,27 +7,51 @@ import torch.nn.functional as F
 
 
 
-# the lstm model for prediction
-class RNNModel(nn.Module):
-    def __init__(self, input_dim, units, output_size):
-        super(RNNModel, self).__init__()
-        self.lstm = nn.LSTM(input_size=input_dim, hidden_size=units, batch_first=True)
-        self.batch_norm = nn.BatchNorm1d(units)
-        self.fc = nn.Linear(units, output_size)
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class FootballMatchPredictor(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_size):
+        """
+        input_dim: Number of features per time step in the input.
+        hidden_dim: The number of features in the hidden state h of the LSTM.
+        output_size: The number of classes for prediction (e.g., win, lose, draw).
+        """
+        super(FootballMatchPredictor, self).__init__()
+        self.hidden_dim = hidden_dim
+
+        # Unidirectional LSTM because of future prediction
+        self.lstm = nn.LSTM(input_dim, hidden_dim, bidirectional=False)
+
+        # Mapping from LSTM output to the prediction space W/L/D
+        self.hidden2tag = nn.Linear(hidden_dim, output_size)
+
+    def forward(self, match_sequences):
+        # Assuming match_sequences is of shape (batch_size, seq_len, input_dim)
+        lstm_out, _ = self.lstm(match_sequences)
+        # last_timestep_output = lstm_out[:, -1, :]
+        # # Reshape output for linear layer
+        # tag_space = self.hidden2tag(last_timestep_output.view(-1, self.hidden_dim))
+        # # Calculate log softmax across the tag dimension
+        # tag_scores = F.log_softmax(tag_space, dim=1)
+        # # Reshape back to (batch_size, seq_len, output_size) format
+        # tag_scores = tag_scores.view(match_sequences.size(0), match_sequences.size(1), -1)
+        # return tag_scores
+
+         # Select the output of the last timestep for each sequence in the batch
+        # lstm_out[:, -1, :] selects the last time step; shape is (batch_size, hidden_dim)
+        last_timestep_output = lstm_out[:, -1, :]
         
-    def forward(self, x):
-        x = x.unsqueeze(-1) 
-        # print(x.shape)
-        lstm_out, (hidden, cell) = self.lstm(x)
+        # Pass the output of the last timestep through the linear layer
+        tag_space = self.hidden2tag(last_timestep_output)
         
-        # Batch normalization
-        # Need to reshape data for BatchNorm1d
-        lstm_out = lstm_out[:, -1, :] 
-        norm_out = self.batch_norm(lstm_out)
+        # Calculate log softmax (if you're using NLLLoss as your criterion)
+        # or softmax (if you're using CrossEntropyLoss as your criterion)
+        # Adjust based on your loss function
+        tag_scores = F.log_softmax(tag_space, dim=1)
         
-        # Dense layer to produce output
-        out = self.fc(norm_out)
-        return out
+        return tag_scores
     
 
 # A fully connect network as reference 
