@@ -23,7 +23,7 @@ class FootballMatchPredictor(nn.Module):
 
         # Unidirectional LSTM because of future prediction
         self.lstm = nn.LSTM(input_dim, hidden_dim, bidirectional=False)
-
+        self.relu = nn.ReLU()
         # Mapping from LSTM output to the prediction space W/L/D
         self.hidden2tag = nn.Linear(hidden_dim, output_size)
 
@@ -44,7 +44,7 @@ class FootballMatchPredictor(nn.Module):
         last_timestep_output = lstm_out[:, -1, :]
         
         # Pass the output of the last timestep through the linear layer
-        tag_space = self.hidden2tag(last_timestep_output)
+        tag_space = self.hidden2tag(self.relu(last_timestep_output))
         
         # Calculate log softmax (if you're using NLLLoss as your criterion)
         # or softmax (if you're using CrossEntropyLoss as your criterion)
