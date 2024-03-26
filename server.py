@@ -105,7 +105,7 @@ def get_model_response(message):
             'West Ham',
             'Wolves']
 
-    pd.read_csv("Datasets/epl-2324-not-occurred.csv")
+    
 
 
 
@@ -119,6 +119,7 @@ def get_model_response(message):
         current_keyword_set  = question.split()
         similarity = sum(check_similarity(word, message_word) for word in current_keyword_set for message_word in message_words) / len(current_keyword_set)
         if similarity > highest_similarity:
+            print("in loop")
             highest_similarity = similarity
             best_match = question
             best_match_index = index
@@ -149,7 +150,7 @@ def get_model_response(message):
         answer = get_answer(result[0], date, win)
         return answer
     else:
-        return "Sorry, I don't understand that."
+        return "Sorry, I don't understand that, you can ask it this way: Who is winner between Man city and Aston Villa."
 
 
 

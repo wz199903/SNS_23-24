@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import torch
 from torch import nn
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import datasets, transforms
 from model import *
 import torch.optim as optim
@@ -129,15 +129,16 @@ def train(args, model, device, team_series_data, team_series_label):
 
     print(team_series_data.shape)
     print(team_series_label.shape)
-    train_loader = DataLoader(
-        dataset=train_dataset,
-        batch_size=args.batch_size,
-        shuffle=True
-    )
+
+
+    train_size = int(0.8 * len(train_dataset))  # 80% for training
+    validation_size = len(train_dataset) - train_size  # 20% for validation
+    train_dataset, validation_dataset = random_split(train_dataset, [train_size, validation_size])
 
     # train_dataset = CSVDataset(csv_file_data=args.train_data, csv_file_label=args.train_label)
     # train_loader = DataLoader(dataset=train_dataset, batch_size=args.batch_size, shuffle=True)
-
+    train_loader = DataLoader(dataset=train_dataset, batch_size=args.batch_size, shuffle=True)
+    validation_loader = DataLoader(dataset=validation_dataset, batch_size=args.batch_size, shuffle=False)
 
     # # Load your dataset
     # train_dataset = CSVDataset(csv_file_data=args.train_data, csv_file_label='your_label_file.csv')  # Adjust the label file argument accordingly
@@ -169,11 +170,25 @@ def train(args, model, device, team_series_data, team_series_label):
             total += target.size(0)
             correct += (predicted == target).sum().item() 
 
-            if batch_idx % 100 == 0:
-                accuracy = 100. * correct / total
-                print(f'Train Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)} '
-                    f'({100. * batch_idx / len(train_loader):.0f}%)]\t'
-                    f'Loss: {loss.item():.6f} Accuracy: {accuracy:.2f}%')
+        training_accuracy = 100. * correct / total
+        print(f'Epoch: {epoch} Training Accuracy: {training_accuracy:.2f}%')
+
+
+        model.eval()
+        val_correct = 0
+        val_total = 0
+        with torch.no_grad():
+            for data, target in validation_loader:
+                data, target = data.to(device), target.to(device)
+                output = model(data)
+                _, predicted = torch.max(output.data, 1)
+                val_total += target.size(0)
+                val_correct += (predicted == target).sum().item()
+
+        # Print validation accuracy for the epoch
+        validation_accuracy = 100. * val_correct / val_total
+        print(f'Epoch: {epoch} Validation Accuracy: {validation_accuracy:.2f}%')
+            
     torch.save(model.state_dict(), args.model_save_path)
     print('Training Complete.')
 
@@ -185,12 +200,11 @@ def test(args, model, device, team_series_data, team_series_label):
     model.eval()
     test_dataset = Data.TensorDataset(team_series_data, team_series_label)
 
-    # print(team_series_data.shape)
     # print(team_series_label.shape)
     test_loader = DataLoader(
         dataset=test_dataset,
         batch_size=args.batch_size,
-        shuffle=True
+        shuffle=False
     )
 
 

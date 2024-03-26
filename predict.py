@@ -117,8 +117,8 @@ def create_dataset(data_dic, lookback_seqlen):
                     # y = pd.concat([y,labels_onehot])
 
     # labels = np.argmax(np.stack(y), axis=1)
-    x_np = np.array(X)
-    return torch.tensor(x_np, dtype=torch.float32)
+    # x_np = np.array(X)
+    return torch.FloatTensor(X)
 
 
 def get_df(args):
@@ -148,7 +148,7 @@ def get_args():
 
 
 
-def predict(args, device, team_series_data, model):
+def predict(device, team_series_data, model):
 
     # test_dataset = CSVDataset(csv_file_data=args.test_data, csv_file_label=args.test_label)
     # test_loader = DataLoader(dataset=test_dataset, batch_size=args.batch_size, shuffle=True)
@@ -159,7 +159,7 @@ def predict(args, device, team_series_data, model):
     predicted_loader = DataLoader(
         dataset=predicted_dataset,
         batch_size=1,
-        shuffle=True
+        shuffle=False
     )
 
 
@@ -176,33 +176,6 @@ def predict(args, device, team_series_data, model):
     # accuracy = 100. * correct / len(predicted_loader.dataset)
     return predicted
 
-def predict_server(device, team_series_data, model):
-
-    # test_dataset = CSVDataset(csv_file_data=args.test_data, csv_file_label=args.test_label)
-    # test_loader = DataLoader(dataset=test_dataset, batch_size=args.batch_size, shuffle=True)
-    model.to(device)
-    model.eval()
-    predicted_dataset = Data.TensorDataset(team_series_data)
-
-    predicted_loader = DataLoader(
-        dataset=predicted_dataset,
-        batch_size=1,
-        shuffle=True
-    )
-
-
-
-    with torch.no_grad():
-        for data in predicted_loader:
-            data = data[0]
-            # print(data)
-            data = data.to(device)
-            output = model(data)
-            _, predicted = torch.max(output.data, 1)
-
-    # test_loss /= len(predicted_loader.dataset)
-    # accuracy = 100. * correct / len(predicted_loader.dataset)
-    return predicted
 
 def load_model(path):
     model_loaded = torch.load(path)
@@ -226,7 +199,7 @@ def predict_server(HomeTeam, AwayTeam, seq_len):
 
     team_series_pre_data = create_dataset(data_dic_pre, seq_len)
 
-    result = predict_server(device, team_series_pre_data, model)
+    result = predict(device, team_series_pre_data, model)
 
     return result.tolist()
 
@@ -249,7 +222,7 @@ if __name__ == "__main__":
 
     team_series_pre_data = create_dataset(data_dic_pre, args.seq_len_required)
 
-    result = predict(args, device, team_series_pre_data, model)
+    result = predict(device, team_series_pre_data, model)
 
     print(result.tolist())
 

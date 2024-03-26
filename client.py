@@ -10,6 +10,7 @@ def send_message_to_server(message):
         print("Error communicating with server:", e)
 
 if __name__ == '__main__':
+    print('Hello dear user, I am Oracle, a chatbot which can predict result of matches in UK Prime League in season 2023/2024, please provide me the team names.')
     while True:
         user_input = input("You: ")
         if user_input.lower() == "quit":
