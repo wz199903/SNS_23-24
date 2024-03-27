@@ -12,28 +12,28 @@ def check_similarity(a,b):
     return SequenceMatcher(None, a, b).ratio()
 
 
-# an automatic date finder using NLP model
-def get_date(message, mode):
-    if mode == 0: 
-        message_lower = message.lower()
-        current_year = datetime.now().year
-        try:
-            date_return = str(parser.parse(message, fuzzy=True))
-            return date_return
-        except:
-            if "this year" in message_lower:
-                return current_year
-            elif "last year" in message_lower:
-                last_year = current_year - 1
-                return last_year
-            elif "next year" in message_lower:
-                next_year = current_year + 1
-                return next_year
-            else:
-                return "error"
-    elif mode == 1:
-        date_return = str(parser.parse(message, fuzzy=True))
-        return date_return
+# # an automatic date finder using NLP model
+# def get_date(message, mode):
+#     if mode == 0: 
+#         message_lower = message.lower()
+#         current_year = datetime.now().year
+#         try:
+#             date_return = str(parser.parse(message, fuzzy=True))
+#             return date_return
+#         except:
+#             if "this year" in message_lower:
+#                 return current_year
+#             elif "last year" in message_lower:
+#                 last_year = current_year - 1
+#                 return last_year
+#             elif "next year" in message_lower:
+#                 next_year = current_year + 1
+#                 return next_year
+#             else:
+#                 return "error"
+#     elif mode == 1:
+#         date_return = str(parser.parse(message, fuzzy=True))
+#         return date_return
 
 
 
@@ -124,25 +124,26 @@ def get_model_response(message):
             best_match = question
             best_match_index = index
             found_teams = extract_teams_from_sentence(message_words, Teams)
+            date = str(parser.parse(message, fuzzy=True))
 
 
     
     # date will be transfer to model
 
-    date = get_date(message,best_match_index)
+    # date = get_date(message,best_match_index)
   
-    seq_len = 5
+    seq_len = 10
 
     if highest_similarity > 0.5:
         
         # TODO Here
-        result = predict_server(found_teams[0], found_teams[1], seq_len)
-        print(found_teams)
+        result = predict_server(date, seq_len)
+        print(result)
         win = None
-        if result[0] == 0:
-            win = found_teams[0]
-        elif result[0] == 2:
-            win = found_teams[1]
+        if result[0] == 2:
+            win = "Home Team"
+        elif result[0] == 0:
+            win = "Away Team"
         else:
             win = 'draw'
         

@@ -146,7 +146,7 @@ def train(args, model, device, team_series_data, team_series_label):
     
     # Define model, loss, and optimizer
     model.to(device)
-    criterion = nn.CrossEntropyLoss() 
+    criterion = nn.NLLLoss() 
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     
     # Training loop

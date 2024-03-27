@@ -28,28 +28,15 @@ class FootballMatchPredictor(nn.Module):
         self.hidden2tag = nn.Linear(hidden_dim, output_size)
 
     def forward(self, match_sequences):
-        # Assuming match_sequences is of shape (batch_size, seq_len, input_dim)
         lstm_out, _ = self.lstm(match_sequences)
-        # last_timestep_output = lstm_out[:, -1, :]
-        # # Reshape output for linear layer
-        # tag_space = self.hidden2tag(last_timestep_output.view(-1, self.hidden_dim))
-        # # Calculate log softmax across the tag dimension
-        # tag_scores = F.log_softmax(tag_space, dim=1)
-        # # Reshape back to (batch_size, seq_len, output_size) format
-        # tag_scores = tag_scores.view(match_sequences.size(0), match_sequences.size(1), -1)
-        # return tag_scores
-
-         # Select the output of the last timestep for each sequence in the batch
-        # lstm_out[:, -1, :] selects the last time step; shape is (batch_size, hidden_dim)
+        
         last_timestep_output = lstm_out[:, -1, :]
         
         # Pass the output of the last timestep through the linear layer
         tag_space = self.hidden2tag(self.relu(last_timestep_output))
-        
-        # Calculate log softmax (if you're using NLLLoss as your criterion)
-        # or softmax (if you're using CrossEntropyLoss as your criterion)
-        # Adjust based on your loss function
+
         tag_scores = F.log_softmax(tag_space, dim=1)
+        # print("tag:{}".format(tag_scores))
         
         return tag_scores
     
