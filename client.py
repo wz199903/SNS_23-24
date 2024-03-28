@@ -5,7 +5,7 @@ def send_message_to_server(message):
     try:
         response = requests.post(url, json={"message": message})
         data = response.json()
-        print("Bot:", data.get("response", "No response from server."))
+        print("Oracle:", data.get("response", "No response from server."))
     except requests.exceptions.RequestException as e:
         print("Error communicating with server:", e)
 

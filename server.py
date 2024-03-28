@@ -3,38 +3,13 @@ from difflib import SequenceMatcher
 from dateutil import parser  
 from datetime import datetime
 from predict import *
-import subprocess
+
 
 app = Flask(__name__)
 
 
 def check_similarity(a,b):
     return SequenceMatcher(None, a, b).ratio()
-
-
-# # an automatic date finder using NLP model
-# def get_date(message, mode):
-#     if mode == 0: 
-#         message_lower = message.lower()
-#         current_year = datetime.now().year
-#         try:
-#             date_return = str(parser.parse(message, fuzzy=True))
-#             return date_return
-#         except:
-#             if "this year" in message_lower:
-#                 return current_year
-#             elif "last year" in message_lower:
-#                 last_year = current_year - 1
-#                 return last_year
-#             elif "next year" in message_lower:
-#                 next_year = current_year + 1
-#                 return next_year
-#             else:
-#                 return "error"
-#     elif mode == 1:
-#         date_return = str(parser.parse(message, fuzzy=True))
-#         return date_return
-
 
 
 def get_answer(index, date, result):
@@ -45,38 +20,6 @@ def get_answer(index, date, result):
         date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
         new_date = f"{date_obj.year}/{date_obj.month}/{date_obj.day}"
         return f"The champion of prime league of {new_date} is {result}. How can I assist you further?"
-    # if index == 1:
-    #     return f"The champion of match {date} is {result}. How can I assist you further?"
-
-# def get_result():
-#     result = subprocess.run(['ls', '-l'], capture_output=True, text=True)
-#     command = [
-#     'python', 'predict.py',
-#     '--predict_data', 'Datasets/test_set_en.csv',
-#     '--load_model_path', 'path_to_save_model.pth',
-#     '--use_cuda',
-#     '--seq_len_required', '5'
-#     ]
-
-#     # Execute the command
-#     result = subprocess.run(command, capture_output=True, text=True)
-
-#     # Check if the command was executed successfully
-#     if result.returncode == 0:
-#         print("Command executed successfully!")
-#         print("Output:\n", result.stdout)
-#     else:
-#         print("Error:", result.stderr)
-    
-#     return result
-
-
-# def extract_teams(sentence):
-#     # Normalize the sentence to lower case to make the search case-insensitive
-#     normalized_sentence = sentence.lower()
-#     # Find teams mentioned in the sentence
-#     mentioned_teams = [team for team in teams if team.lower() in normalized_sentence]
-#     return mentioned_teams
 
 
 def extract_teams_from_sentence(sentence, team_names):
