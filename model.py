@@ -1,15 +1,7 @@
-import os
-import torch
+
 from torch import nn
-from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
 import torch.nn.functional as F
 
-
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
 class FootballMatchPredictor(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_size):
@@ -39,18 +31,4 @@ class FootballMatchPredictor(nn.Module):
         # print("tag:{}".format(tag_scores))
         
         return tag_scores
-    
 
-# A fully connect network as reference 
-class MatchPredictor(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super(MatchPredictor, self).__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)  
-        self.fc2 = nn.Linear(hidden_size, hidden_size)  
-        self.fc3 = nn.Linear(hidden_size, output_size)  
-        
-    def forward(self, x):
-        x = F.relu(self.fc1(x))  
-        x = F.relu(self.fc2(x)) 
-        x = self.fc3(x)  
-        return x
