@@ -27,7 +27,7 @@ class FootballMatchPredictor(nn.Module):
         # Pass the output of the last timestep through the linear layer
         tag_space = self.hidden2tag(self.relu(last_timestep_output))
 
-        tag_scores = F.log_softmax(tag_space, dim=1)
+        tag_scores = F.softmax(tag_space, dim=1)
         # print("tag:{}".format(tag_scores))
         
         return tag_scores

@@ -13,13 +13,9 @@ def check_similarity(a,b):
 
 
 def get_answer(index, date, result):
-
-    if date == "error":
-        return f"Sorry, the year you are asking is invalid. How can I assist you further?"
-    else:
-        date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-        new_date = f"{date_obj.year}/{date_obj.month}/{date_obj.day}"
-        return f"The champion of prime league of {new_date} is {result}. How can I assist you further?"
+    date_obj = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+    new_date = f"{date_obj.year}/{date_obj.month}/{date_obj.day}"
+    return f"The winner on {new_date} is {result}. How can I assist you further?"
 
 
 def extract_teams_from_sentence(sentence, team_names):
@@ -62,9 +58,6 @@ def get_model_response(message):
 
 
     message_words = set(message.lower().split())
-    # print(message_words)
-    # best_match = None
-    # best_match_index = None
     highest_similarity = 0.0
     found_teams = []
 
@@ -72,40 +65,32 @@ def get_model_response(message):
         current_keyword_set  = question.split()
         similarity = sum(check_similarity(word, message_word) for word in current_keyword_set for message_word in message_words) / len(current_keyword_set)
         if similarity > highest_similarity:
-            print("in loop")
             highest_similarity = similarity
-            # best_match = question
-            # best_match_index = index
             found_teams = extract_teams_from_sentence(message, Teams)
             try:
                 date = str(parser.parse(message, fuzzy=True))
             except:
                 return "Sorry, Oracle cannot found a valid match date in your sentence, please try again"
 
-    print(found_teams)
     if len(found_teams) < 2:
         return "Sorry, please provide two valid team name."
 
-    
-
-
-    # date = get_date(message,best_match_index)
     
 
     seq_len = 500
 
     if highest_similarity > 0.5:
         
-        # TODO Here
         result = predict_server(date, seq_len, found_teams)
-        result = result.cpu().tolist()
+        try:
+            result = result.cpu().tolist()
+        except:
+            if result == "ERROR":
+                return "Sorry, the match info you have provided is invalid"
 
-        print(result[0])
         win = None
-        
-        if result == "ERROR":
-            return "Sorry, the match info you have provided is invalid"
-        elif result[0] == 2:
+
+        if result[0] == 2:
             win = "Home Team"
         elif result[0] == 0:
             win = "Away Team"

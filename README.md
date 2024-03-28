@@ -1,5 +1,5 @@
 # SNS_23-24 CW
-## By Yinglong Liang & Zhe Wang
+## By SN: 21185548/ 23209239
 
 ### Overview
 This project, **SNS Assignment Project 23-24**, implements a Oracle chatbot which predict the outcomes of UK Premier League matches from February 1st, 2023, to March 17th, 2023. The model uses LSTM (Long Short-Term Memory) neural network model for analysis
