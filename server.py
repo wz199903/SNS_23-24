@@ -27,8 +27,7 @@ def get_model_response(message):
 
 
     predefined_keyword_set = [
-        # "champion of this last next year prime league": "A",
-        "winner of match game beats prime league"]
+        "winner of match game beats Premiere League"]
     
 
     Teams = ['Arsenal',

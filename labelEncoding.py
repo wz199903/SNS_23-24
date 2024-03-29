@@ -41,11 +41,22 @@ for i in range(1, 6):
 def plot_correlation(data):
     plt.figure(figsize=(15, 10))
     plt.style.use('ggplot')
-    my_cmap = plt.colormaps['Accent']
+    my_cmap = plt.get_cmap('Accent')
 
-    numeric_df = data.select_dtypes(include=[np.number])
+    selected_features = ['FTR', 'HTGS_norm', 'ATGS_norm', 'HTGC_norm', 'ATGC_norm',
+                         'HTP_norm', 'ATP_norm', 'HM1', 'AM1', 'HM2', 'AM2',
+                         'HM3', 'AM3', 'HM4', 'AM4', 'HM5', 'AM5', 'HomeTeamRk',
+                         'AwayTeamRk', 'DiffLP']
 
-    correlations = numeric_df.corr()['FTR'].sort_values(ascending=False)
+    numeric_df = data[selected_features]
+
+    # Calculate correlations excluding 'FTR' column
+    correlations = numeric_df.drop('FTR', axis=1).corr()['FTR']
+
+    # Remove NaN values and sort correlations
+    correlations = correlations.dropna().sort_values(ascending=False)
+
+    # Plot correlations
     correlations.plot(kind='bar', cmap=my_cmap)
 
     plt.title('Correlation', fontsize=20)
@@ -63,18 +74,23 @@ def plot_correlation(data):
 
 
 def plot_correlation_heatmap(data):
-    numeric_df = data.select_dtypes(include=[np.number])
+    selected_features = ['HTGS_norm', 'ATGS_norm', 'HTGC_norm', 'ATGC_norm',
+                         'HTP_norm', 'ATP_norm', 'HM1', 'AM1', 'HM2', 'AM2',
+                         'HM3', 'AM3', 'HM4', 'AM4', 'HM5', 'AM5', 'HomeTeamRk',
+                         'AwayTeamRk', 'DiffLP']
+
+    numeric_df = data[selected_features].select_dtypes(include=[np.number])
     cor = numeric_df.corr()
 
     plt.figure(figsize=(40, 35))
     ax = sns.heatmap(cor, annot=False, cmap='coolwarm')
 
-    ax.set_xticklabels(ax.get_xmajorticklabels(), fontsize=10, rotation=90)
-    ax.set_yticklabels(ax.get_ymajorticklabels(), fontsize=10, rotation=0)
+    ax.set_xticklabels(ax.get_xmajorticklabels(), fontsize=45, rotation=45)
+    ax.set_yticklabels(ax.get_ymajorticklabels(), fontsize=45, rotation=0)
 
-    ax.figure.axes[-1].tick_params(labelsize=20)
+    ax.figure.axes[-1].tick_params(labelsize=45)
 
-    plt.savefig('./correlation_matrix_full.png', format='png')
+    plt.savefig('./correlation_matrix_selected.png', format='png')
 
     plt.show()
 
